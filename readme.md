@@ -1,5 +1,7 @@
 # TilePipe2
 
+## This fork adds AI MCP server functionality to TilePipe
+
 ## Intro
 Most game engines supporting 2D also support autotiling - substituting a tile variant depending on it's neighbors. That way a level designer is able to paint a terrain with one tile and have a tile variant set up automatically. To create such an autotile an artist has to copy and paste one tile multiple times to create all possible tile variations by hand and then, if there is a need to update something, he has to do it again. 
 
