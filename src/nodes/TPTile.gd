@@ -2,6 +2,8 @@ class_name TPTile
 extends Control
 
 
+const Const = preload("res://src/Const.gd")
+
 signal row_selected(row)
 signal copy_tile_called(tile)
 signal rename_tile_called(tile)
@@ -172,7 +174,7 @@ func load_tile(directory: String, tile_file: String, is_new: bool = false) -> bo
 		file.close()
 	var parsed_data = parse_json(file_text)
 	if typeof(parsed_data) != TYPE_DICTIONARY:
-		State.report_error("Error loading tile: " + tile_file)
+		report_error("Error loading tile: " + tile_file)
 		block_failed_tile()
 		return false
 	_tile_data = parsed_data
@@ -279,18 +281,18 @@ func check_ruleset_changed() -> bool:
 
 func smart_reload_assets():
 	if check_texture_changed() or check_template_changed() or check_ruleset_changed():
-		load_texture(texture_path.trim_prefix(State.current_dir))
-		load_ruleset(ruleset_path.trim_prefix(State.current_dir))
+		load_texture(texture_path.trim_prefix(get_current_dir()))
+		load_ruleset(ruleset_path.trim_prefix(get_current_dir()))
 		init_frames()
-		load_template(template_path.trim_prefix(State.current_dir))
+		load_template(template_path.trim_prefix(get_current_dir()))
 		split_input_into_tile_parts()
 		set_frame_randomness()
-		State.emit_signal("tile_needs_render")
+		emit_tile_needs_render()
 
 
 func reload():
 	load_tile(current_directory, tile_file_name)
-	State.emit_signal("tile_needs_render")
+	emit_tile_needs_render()
 
 
 func block_failed_tile():
@@ -307,7 +309,7 @@ func load_texture(path: String) -> bool:
 	var image = Image.new()	
 	var err: int = image.load(file_path)
 	if err != OK:
-		State.report_error("Error loading texture at: \"" + _tile_data["texture"] + "\" for tile \"" + tile_file_name + "\"")
+		report_error("Error loading texture at: \"" + _tile_data["texture"] + "\" for tile \"" + tile_file_name + "\"")
 		return false
 	texture_path = file_path
 	input_texture = ImageTexture.new()
@@ -324,7 +326,7 @@ func load_ruleset(path: String) -> bool:
 	ruleset = Ruleset.new(file_path)
 	ruleset_path = file_path
 	if ruleset.last_error != -1:
-		State.report_error("\nError in ruleset %s :\n" % file_path + ruleset.last_error_message)
+		report_error("\nError in ruleset %s :\n" % file_path + ruleset.last_error_message)
 		return false
 	var f := File.new()
 	ruleset_modified_time = f.get_modified_time(file_path)
@@ -340,10 +342,10 @@ func load_template(path: String) -> bool:
 	var err: int
 	err = image.load(file_path)
 	if err != OK:
-		State.report_error("Error loading template at: \"" + _tile_data["template"] + "\" for tile \"" + tile_file_name + "\"")
+		report_error("Error loading template at: \"" + _tile_data["template"] + "\" for tile \"" + tile_file_name + "\"")
 		return false
 	if image.get_size().x < Const.TEMPLATE_TILE_SIZE or image.get_size().y < Const.TEMPLATE_TILE_SIZE:
-		State.report_error("Error in template: template texture size should be at least 32x32px")
+		report_error("Error in template: template texture size should be at least 32x32px")
 		return false
 	template_path = file_path
 	template = ImageTexture.new()
@@ -471,13 +473,13 @@ func _on_Tree_item_collapsed(item: TreeItem):
 
 
 func update_texture(abs_path: String) -> bool:
-	var rel_path := abs_path.trim_prefix(State.current_dir)
+	var rel_path := abs_path.trim_prefix(get_current_dir())
 	texture_path = abs_path
 	if not load_texture(rel_path):
 		input_texture = null
 		clear_render_result()
 		if not abs_path.empty():
-			State.report_error("Error: invalid texture path")
+			report_error("Error: invalid texture path")
 	_tile_data["texture"] = rel_path
 	assure_tile_size()
 	split_input_into_tile_parts()
@@ -485,13 +487,13 @@ func update_texture(abs_path: String) -> bool:
 
 
 func update_ruleset(abs_path: String) -> bool:
-	var rel_path := abs_path.trim_prefix(State.current_dir)
+	var rel_path := abs_path.trim_prefix(get_current_dir())
 	ruleset_path = abs_path
 	if not load_ruleset(rel_path):
 		ruleset = null
 		clear_render_result()
 		if not abs_path.empty():
-			State.report_error("Error: invalid ruleset")
+			report_error("Error: invalid ruleset")
 	ruleset_row.set_text(0, RULESET_PREFIX + rel_path)
 	_tile_data["ruleset"] = rel_path
 	split_input_into_tile_parts()
@@ -499,13 +501,13 @@ func update_ruleset(abs_path: String) -> bool:
 
 
 func update_template(abs_path: String) -> bool:
-	var rel_path := abs_path.trim_prefix(State.current_dir)
+	var rel_path := abs_path.trim_prefix(get_current_dir())
 	template_path = abs_path
 	if not load_template(rel_path):
 		template = null
 		clear_render_result()
 		if not abs_path.empty():
-			State.report_error("Error: invalid template")
+			report_error("Error: invalid template")
 	template_row.set_text(0, TEMPLATE_PREFIX + rel_path)
 	_tile_data["template"] = rel_path
 	split_input_into_tile_parts()
@@ -704,7 +706,7 @@ func update_ui_tree_collapsed(value: bool):
 # returns true if param was successfully changed
 func update_param(param_key: int, value) -> bool:
 	if not param_key in UPDATE_FUNCTIONS or not has_method(UPDATE_FUNCTIONS[param_key]):
-		State.report_error("Error updating tile parameter %d" % param_key)
+		report_error("Error updating tile parameter %d" % param_key)
 		return false
 	return call(UPDATE_FUNCTIONS[param_key], value)
 
@@ -727,7 +729,7 @@ func get_output_tile_size() -> Vector2:
 func glue_frames_into_image() -> Image:
 	var result_image := Image.new()
 	if frames[0].result_texture == null or frames[0].result_texture.get_data() == null:
-		State.report_error("Error: No generated texture in frames, tile not fully defined")
+		report_error("Error: No generated texture in frames, tile not fully defined")
 		return null
 	var frame_size: Vector2 = frames[0].result_texture.get_size()
 	result_image.create(int(frame_size.x), int(frame_size.y) * frames.size(), false, Image.FORMAT_RGBA8)
@@ -796,3 +798,21 @@ func clear_render_result():
 func is_able_to_render() -> bool:
 	return input_texture != null and ruleset != null \
 			and ruleset.is_loaded and template != null
+
+
+func get_current_dir() -> String:
+	if has_node("/root/State"):
+		return get_node("/root/State").current_dir
+	return current_directory
+
+
+func emit_tile_needs_render():
+	if has_node("/root/State"):
+		get_node("/root/State").emit_signal("tile_needs_render")
+
+
+func report_error(message: String):
+	if has_node("/root/State"):
+		get_node("/root/State").report_error(message)
+	else:
+		print(message)

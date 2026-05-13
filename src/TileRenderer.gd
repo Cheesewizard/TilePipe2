@@ -2,6 +2,8 @@ class_name TileRenderer
 extends Node
 
 
+const Const = preload("res://src/Const.gd")
+
 signal subtiles_ready(frame_index)
 signal report_progress(progress)
 

@@ -34,7 +34,7 @@ func setup(new_part_type: int, part: TilePart, new_random_priority: int = 1, new
 		itex.set_size_override(rect_size)
 		texture = itex
 	else:
-		texture = Ruleset.RULESET_PART_TEXTURES[part_type]
+		texture = load(Ruleset.RULESET_PART_TEXTURE_PATHS[part_type])
 
 
 func get_part_variant_index() -> int:

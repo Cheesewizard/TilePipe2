@@ -79,7 +79,7 @@ func set_part_highlight(part_id: int, is_on: bool, tile: TPTile = null):
 		highlight.rect_position = Vector2(part.part_index, part.variant_index) * tile_size
 		highlight.rect_size = tile_size
 		highlight.expand = true
-		highlight.texture = Ruleset.PART_HIGHLIGHT_MASKS[part.ruleset_part_index]
+		highlight.texture = load(Ruleset.PART_HIGHLIGHT_MASK_PATHS[part.ruleset_part_index])
 		highlight_contaoner.add_child(highlight)
 
 

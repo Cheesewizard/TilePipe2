@@ -1,6 +1,8 @@
 extends Node
 
 
+const Const = preload("res://src/Const.gd")
+
 signal tile_selected(tile_node, row_item, is_same)
 signal tile_cleared()
 signal tile_needs_render()
@@ -46,7 +48,7 @@ func set_current_dir(new_path: String):
 	
 
 
-func set_current_tile(tile: TPTile, row: TreeItem = null):
+func set_current_tile(tile, row: TreeItem = null):
 	var is_same_tile := false
 	if current_tile_ref == null or current_tile_ref.get_ref() != tile:
 		current_tile_ref = weakref(tile)
@@ -61,11 +63,11 @@ func set_current_tile(tile: TPTile, row: TreeItem = null):
 		tile.select_root() # this will lead to call to this same function, but with current tile and row valid
 
 
-func get_current_tile() -> TPTile:
+func get_current_tile():
 	if current_tile_ref == null:
 #		report_error("Error: failed to load tile")
 		return null
-	var tile: TPTile = current_tile_ref.get_ref()
+	var tile = current_tile_ref.get_ref()
 	return tile
 
 
@@ -75,7 +77,7 @@ func clear_current_tile():
 
 
 func update_tile_param(param_key: int, value, needs_render: bool = true):
-	var tile: TPTile = get_current_tile()
+	var tile = get_current_tile()
 	if tile == null:
 		return
 	if tile.update_param(param_key, value):

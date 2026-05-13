@@ -48,35 +48,35 @@ const RULESET_PART_OVERLAP_VECTORS := {
 	RULESET_TILE_PARTS.CORNER_OUT_BOTTOM_LEFT: Vector2(1, 1),
 	RULESET_TILE_PARTS.CORNER_OUT_TOP_LEFT: Vector2(1, 1),
 }
-const RULESET_PART_TEXTURES := {
-	RULESET_TILE_PARTS.FULL: preload("res://assets/images/ruleset_icons/ruleset_tile_full.png"), 
-	RULESET_TILE_PARTS.SIDE_TOP: preload("res://assets/images/ruleset_icons/ruleset_tile_top.png"),
-	RULESET_TILE_PARTS.SIDE_RIGHT: preload("res://assets/images/ruleset_icons/ruleset_tile_right.png"),
-	RULESET_TILE_PARTS.SIDE_BOTTOM: preload("res://assets/images/ruleset_icons/ruleset_tile_bottom.png"),
-	RULESET_TILE_PARTS.SIDE_LEFT: preload("res://assets/images/ruleset_icons/ruleset_tile_left.png"),
-	RULESET_TILE_PARTS.CORNER_IN_TOP_RIGHT: preload("res://assets/images/ruleset_icons/ruleset_tile_in_top_right.png"),
-	RULESET_TILE_PARTS.CORNER_IN_BOTTOM_RIGHT: preload("res://assets/images/ruleset_icons/ruleset_tile_in_bottom_right.png"),
-	RULESET_TILE_PARTS.CORNER_IN_BOTTOM_LEFT: preload("res://assets/images/ruleset_icons/ruleset_tile_in_bottom_left.png"),
-	RULESET_TILE_PARTS.CORNER_IN_TOP_LEFT: preload("res://assets/images/ruleset_icons/ruleset_tile_in_top_left.png"),
-	RULESET_TILE_PARTS.CORNER_OUT_TOP_RIGHT: preload("res://assets/images/ruleset_icons/ruleset_tile_out_top_right.png"),
-	RULESET_TILE_PARTS.CORNER_OUT_BOTTOM_RIGHT: preload("res://assets/images/ruleset_icons/ruleset_tile_out_bottom_right.png"), 
-	RULESET_TILE_PARTS.CORNER_OUT_BOTTOM_LEFT: preload("res://assets/images/ruleset_icons/ruleset_tile_out_bottom_left.png"), 
-	RULESET_TILE_PARTS.CORNER_OUT_TOP_LEFT: preload("res://assets/images/ruleset_icons/ruleset_tile_out_top_left.png"),
+const RULESET_PART_TEXTURE_PATHS := {
+	RULESET_TILE_PARTS.FULL: "res://assets/images/ruleset_icons/ruleset_tile_full.png", 
+	RULESET_TILE_PARTS.SIDE_TOP: "res://assets/images/ruleset_icons/ruleset_tile_top.png",
+	RULESET_TILE_PARTS.SIDE_RIGHT: "res://assets/images/ruleset_icons/ruleset_tile_right.png",
+	RULESET_TILE_PARTS.SIDE_BOTTOM: "res://assets/images/ruleset_icons/ruleset_tile_bottom.png",
+	RULESET_TILE_PARTS.SIDE_LEFT: "res://assets/images/ruleset_icons/ruleset_tile_left.png",
+	RULESET_TILE_PARTS.CORNER_IN_TOP_RIGHT: "res://assets/images/ruleset_icons/ruleset_tile_in_top_right.png",
+	RULESET_TILE_PARTS.CORNER_IN_BOTTOM_RIGHT: "res://assets/images/ruleset_icons/ruleset_tile_in_bottom_right.png",
+	RULESET_TILE_PARTS.CORNER_IN_BOTTOM_LEFT: "res://assets/images/ruleset_icons/ruleset_tile_in_bottom_left.png",
+	RULESET_TILE_PARTS.CORNER_IN_TOP_LEFT: "res://assets/images/ruleset_icons/ruleset_tile_in_top_left.png",
+	RULESET_TILE_PARTS.CORNER_OUT_TOP_RIGHT: "res://assets/images/ruleset_icons/ruleset_tile_out_top_right.png",
+	RULESET_TILE_PARTS.CORNER_OUT_BOTTOM_RIGHT: "res://assets/images/ruleset_icons/ruleset_tile_out_bottom_right.png", 
+	RULESET_TILE_PARTS.CORNER_OUT_BOTTOM_LEFT: "res://assets/images/ruleset_icons/ruleset_tile_out_bottom_left.png", 
+	RULESET_TILE_PARTS.CORNER_OUT_TOP_LEFT: "res://assets/images/ruleset_icons/ruleset_tile_out_top_left.png",
 }
-const PART_HIGHLIGHT_MASKS := {
-	RULESET_TILE_PARTS.FULL: preload("res://assets/images/part_masks/tile_full.png"), 
-	RULESET_TILE_PARTS.SIDE_TOP: preload("res://assets/images/part_masks/tile_top.png"),
-	RULESET_TILE_PARTS.SIDE_RIGHT: preload("res://assets/images/part_masks/tile_right.png"),
-	RULESET_TILE_PARTS.SIDE_BOTTOM: preload("res://assets/images/part_masks/tile_bottom.png"),
-	RULESET_TILE_PARTS.SIDE_LEFT: preload("res://assets/images/part_masks/tile_left.png"),
-	RULESET_TILE_PARTS.CORNER_IN_TOP_RIGHT: preload("res://assets/images/part_masks/tile_in_top_right.png"),
-	RULESET_TILE_PARTS.CORNER_IN_BOTTOM_RIGHT: preload("res://assets/images/part_masks/tile_in_bottom_right.png"),
-	RULESET_TILE_PARTS.CORNER_IN_BOTTOM_LEFT: preload("res://assets/images/part_masks/tile_in_bottom_left.png"),
-	RULESET_TILE_PARTS.CORNER_IN_TOP_LEFT: preload("res://assets/images/part_masks/tile_in_top_left.png"),
-	RULESET_TILE_PARTS.CORNER_OUT_TOP_RIGHT: preload("res://assets/images/part_masks/tile_out_top_right.png"),
-	RULESET_TILE_PARTS.CORNER_OUT_BOTTOM_RIGHT: preload("res://assets/images/part_masks/tile_out_bottom_right.png"), 
-	RULESET_TILE_PARTS.CORNER_OUT_BOTTOM_LEFT: preload("res://assets/images/part_masks/tile_out_bottom_left.png"), 
-	RULESET_TILE_PARTS.CORNER_OUT_TOP_LEFT: preload("res://assets/images/part_masks/tile_out_top_left.png"),
+const PART_HIGHLIGHT_MASK_PATHS := {
+	RULESET_TILE_PARTS.FULL: "res://assets/images/part_masks/tile_full.png", 
+	RULESET_TILE_PARTS.SIDE_TOP: "res://assets/images/part_masks/tile_top.png",
+	RULESET_TILE_PARTS.SIDE_RIGHT: "res://assets/images/part_masks/tile_right.png",
+	RULESET_TILE_PARTS.SIDE_BOTTOM: "res://assets/images/part_masks/tile_bottom.png",
+	RULESET_TILE_PARTS.SIDE_LEFT: "res://assets/images/part_masks/tile_left.png",
+	RULESET_TILE_PARTS.CORNER_IN_TOP_RIGHT: "res://assets/images/part_masks/tile_in_top_right.png",
+	RULESET_TILE_PARTS.CORNER_IN_BOTTOM_RIGHT: "res://assets/images/part_masks/tile_in_bottom_right.png",
+	RULESET_TILE_PARTS.CORNER_IN_BOTTOM_LEFT: "res://assets/images/part_masks/tile_in_bottom_left.png",
+	RULESET_TILE_PARTS.CORNER_IN_TOP_LEFT: "res://assets/images/part_masks/tile_in_top_left.png",
+	RULESET_TILE_PARTS.CORNER_OUT_TOP_RIGHT: "res://assets/images/part_masks/tile_out_top_right.png",
+	RULESET_TILE_PARTS.CORNER_OUT_BOTTOM_RIGHT: "res://assets/images/part_masks/tile_out_bottom_right.png", 
+	RULESET_TILE_PARTS.CORNER_OUT_BOTTOM_LEFT: "res://assets/images/part_masks/tile_out_bottom_left.png", 
+	RULESET_TILE_PARTS.CORNER_OUT_TOP_LEFT: "res://assets/images/part_masks/tile_out_top_left.png",
 }
 const SCHEMA_PATH := "res://rulesets/ruleset_schema.json"
 const PREVIEW_SIZE_PX := 48
@@ -212,13 +212,19 @@ func get_mask_data(mask: int) -> Dictionary:
 func generate_preview() -> Texture:
 #	var parts := get_parts()
 	if not parts.empty():
-		var format: int = RULESET_PART_TEXTURES[parts[0]].get_data().get_format()
+		var first_texture: Texture = load(RULESET_PART_TEXTURE_PATHS[parts[0]])
+		if first_texture == null:
+			return ImageTexture.new()
+		var format: int = first_texture.get_data().get_format()
 		var image := Image.new()
 		image.create(PREVIEW_SIZE_PX * parts.size() + PREVIEW_SPACE_PX * parts.size() - 1, PREVIEW_SIZE_PX, false, format)
 		var part_copy_rect := Rect2(Vector2.ZERO, Vector2(PREVIEW_SIZE_PX, PREVIEW_SIZE_PX))
 		var part_index := 0
 		for part in parts:
-			var part_image: Image = RULESET_PART_TEXTURES[part].get_data() 
+			var texture: Texture = load(RULESET_PART_TEXTURE_PATHS[part])
+			if texture == null:
+				continue
+			var part_image: Image = texture.get_data() 
 			image.blit_rect(part_image, part_copy_rect, Vector2(part_index * (PREVIEW_SIZE_PX + PREVIEW_SPACE_PX), 0))
 			part_index += 1
 		var itex := ImageTexture.new()

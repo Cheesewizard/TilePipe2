@@ -1,13 +1,15 @@
 extends SceneTree
 
 
-const TILE_SCENE := preload("res://src/nodes/TPTile.tscn")
+const Const = preload("res://src/Const.gd")
+const Helpers = preload("res://src/Helpers.gd")
 const RESULT_OK := 0
 const RESULT_ERROR := 1
 
 var request_path := ""
 var response_path := ""
 var request := {}
+var helpers := Helpers.new()
 var response := {
 	"ok": false,
 	"command": "",
@@ -19,7 +21,7 @@ var response := {
 
 
 func _init():
-	call_deferred("_run")
+	_run()
 
 
 func _run():
@@ -58,6 +60,8 @@ func _run():
 
 
 func _parse_args() -> bool:
+	request_path = OS.get_environment("TILEPIPE_REQUEST")
+	response_path = OS.get_environment("TILEPIPE_RESPONSE")
 	var args := OS.get_cmdline_args()
 	for i in range(args.size()):
 		match args[i]:
@@ -104,9 +108,9 @@ func inspect_project():
 	var result := {
 		"project_dir": project_dir,
 		"tiles": _scan_files(project_dir, Const.TILE_EXTENXSION, false),
-		"rulesets": Helpers.scan_for_rulesets_in_dir(project_dir + Const.RULESET_DIR),
-		"templates": Helpers.scan_for_templates_in_dir(project_dir + Const.TEMPLATE_DIR),
-		"textures": Helpers.scan_for_textures_in_dir(project_dir)
+		"rulesets": helpers.scan_for_rulesets_in_dir(project_dir + Const.RULESET_DIR),
+		"templates": helpers.scan_for_templates_in_dir(project_dir + Const.TEMPLATE_DIR),
+		"textures": helpers.scan_for_textures_in_dir(project_dir)
 	}
 	response["metadata"] = result
 	response["ok"] = true
@@ -263,11 +267,9 @@ func _load_tile_from_request() -> TPTile:
 		_add_error("Missing tile_file.")
 		return null
 
-	var scene := TILE_SCENE.instance()
-	get_root().add_child(scene)
-	var tile := scene as TPTile
+	var tile := TPTile.new()
 	if tile == null:
-		_add_error("Could not instantiate TPTile scene.")
+		_add_error("Could not instantiate TPTile.")
 		return null
 
 	if not tile.load_tile(project_dir, tile_file):

@@ -1,6 +1,8 @@
 extends Node
 
 
+const Const = preload("res://src/Const.gd")
+
 func file_exists(path: String) -> bool:
 	var f := File.new()
 	return f.file_exists(path)
@@ -159,7 +161,7 @@ func scan_for_rulesets_in_dir(path: String) -> PoolStringArray:
 			break
 		elif not file.begins_with(".") and file.get_extension() == "json":
 			var file_path: String = path + file
-			if Helpers.is_file_a_ruleset(file_path):
+			if is_file_a_ruleset(file_path):
 				files.append(file_path)
 	dir.list_dir_end()
 	return files
