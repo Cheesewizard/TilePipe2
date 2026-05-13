@@ -2,6 +2,39 @@
 
 ## This fork adds headless automation hooks for TilePipe2 workflows.
 
+## Headless automation
+
+This fork can be driven by automation through `src/headless/TilePipeHeadless.gd`.
+
+Example:
+
+```bash
+godot --no-window --path /path/to/TilePipe2 --script res://src/headless/TilePipeHeadless.gd --request /path/to/request.json --response /path/to/response.json
+```
+
+The request file is JSON:
+
+```json
+{
+	"command": "render_tile",
+	"project_dir": "/path/to/TilePipe2/examples",
+	"tile_file": "3_part.tptile",
+	"output_path": "/path/to/output.png"
+}
+```
+
+Supported commands:
+
+- `inspect_project`
+- `validate_ruleset`
+- `validate_template`
+- `validate_tile`
+- `render_tile`
+- `export_texture`
+- `export_subtiles`
+
+Responses are JSON with `ok`, `command`, `outputs`, `warnings`, `errors`, and `metadata` fields. The companion MCP server lives at `https://github.com/Cheesewizard/tilepipe2-mcp-server`.
+
 ## Intro
 Most game engines supporting 2D also support autotiling - substituting a tile variant depending on it's neighbors. That way a level designer is able to paint a terrain with one tile and have a tile variant set up automatically. To create such an autotile an artist has to copy and paste one tile multiple times to create all possible tile variations by hand and then, if there is a need to update something, he has to do it again. 
 
