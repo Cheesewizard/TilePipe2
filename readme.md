@@ -25,13 +25,22 @@ The request file is JSON:
 
 Supported commands:
 
+- `create_project_from_art`
+- `create_tile`
 - `inspect_project`
+- `list_rulesets`
+- `list_templates`
 - `validate_ruleset`
 - `validate_template`
 - `validate_tile`
 - `render_tile`
 - `export_texture`
 - `export_subtiles`
+- `export_mask_set`
+
+`create_project_from_art` and `create_tile` accept `source_png`, `ruleset_path`, `template_path`, `project_dir`, and `tile_file`. They copy files into TilePipe2's native `textures/`, `rulesets/`, and `templates/` layout and create a `.tptile` JSON file.
+
+`export_mask_set` accepts optional `masks` and `frame_index` fields to export a filtered set of generated subtile PNGs.
 
 Responses are JSON with `ok`, `command`, `outputs`, `warnings`, `errors`, and `metadata` fields. The companion MCP server lives at `https://github.com/Cheesewizard/tilepipe2-mcp-server`.
 

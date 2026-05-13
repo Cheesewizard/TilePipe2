@@ -37,8 +37,16 @@ func _run():
 	response["command"] = command
 
 	match command:
+		"create_project_from_art":
+			create_project_from_art()
+		"create_tile":
+			create_tile()
 		"inspect_project":
 			inspect_project()
+		"list_rulesets":
+			list_rulesets()
+		"list_templates":
+			list_templates()
 		"validate_ruleset":
 			validate_ruleset()
 		"validate_template":
@@ -53,10 +61,93 @@ func _run():
 			var subtile_state = export_subtiles()
 			if subtile_state is GDScriptFunctionState:
 				yield(subtile_state, "completed")
+		"export_mask_set":
+			var mask_state = export_subtiles()
+			if mask_state is GDScriptFunctionState:
+				yield(mask_state, "completed")
 		_:
 			_add_error("Unknown command: %s" % command)
 
 	_finish(RESULT_OK if response["ok"] else RESULT_ERROR)
+
+
+func create_project_from_art():
+	var project_dir := _get_or_create_project_dir()
+	if project_dir.empty():
+		return
+	create_tile()
+
+
+func create_tile():
+	var project_dir := _get_or_create_project_dir()
+	if project_dir.empty():
+		return
+
+	var tile_file := str(request.get("tile_file", ""))
+	if tile_file.empty():
+		_add_error("Missing tile_file.")
+		return
+	if not tile_file.ends_with("." + Const.TILE_EXTENXSION):
+		tile_file += "." + Const.TILE_EXTENXSION
+
+	var source_png := _get_required_path("source_png")
+	var ruleset_path := _get_required_path("ruleset_path")
+	var template_path := _get_required_path("template_path")
+	if not response["errors"].empty():
+		return
+
+	_ensure_dir(project_dir + Const.TEXTURE_DIR)
+	_ensure_dir(project_dir + Const.RULESET_DIR)
+	_ensure_dir(project_dir + Const.TEMPLATE_DIR)
+
+	var texture_rel := Const.TEXTURE_DIR + _safe_file_name(str(request.get("texture_name", source_png.get_file())))
+	var ruleset_rel := Const.RULESET_DIR + _safe_file_name(str(request.get("ruleset_name", ruleset_path.get_file())))
+	var template_rel := Const.TEMPLATE_DIR + _safe_file_name(str(request.get("template_name", template_path.get_file())))
+
+	if not _copy_png(source_png, project_dir + texture_rel):
+		return
+	if not _copy_text_file(ruleset_path, project_dir + ruleset_rel):
+		return
+	if not _copy_png(template_path, project_dir + template_rel):
+		return
+
+	var input_size := _request_vector("input_tile_size", Const.DEFAULT_TILE_SIZE)
+	var output_size := _request_vector("output_tile_size", input_size)
+	var subtile_spacing := _request_vector("subtile_spacing", Vector2.ZERO)
+	var output_resize := bool(request.get("output_resize", output_size != input_size))
+	var tile_data := {
+		"texture": texture_rel,
+		"ruleset": ruleset_rel,
+		"template": template_rel,
+		"output_tile_size": _vector_dict(output_size),
+		"random_seed_enabled": bool(request.get("random_seed_enabled", false)),
+		"smoothing": bool(request.get("smoothing", false)),
+		"merge_level": _vector_dict(_request_vector("merge_level", Vector2(0.25, 0.25))),
+		"overlap_level": _vector_dict(_request_vector("overlap_level", Vector2(0.25, 0.25))),
+		"input_tile_size": _vector_dict(input_size),
+		"output_resize": output_resize,
+		"subtile_spacing": _vector_dict(subtile_spacing),
+		"ui_result_display_scale": float(request.get("ui_result_display_scale", 1.0))
+	}
+
+	var tile_path := project_dir + tile_file
+	var file := File.new()
+	if file.open(tile_path, File.WRITE) != OK:
+		_add_error("Could not create tile file: %s" % tile_path)
+		return
+	file.store_string(JSON.print(tile_data, "\t"))
+	file.close()
+
+	response["outputs"]["tile_file"] = tile_path
+	response["outputs"]["texture"] = project_dir + texture_rel
+	response["outputs"]["ruleset"] = project_dir + ruleset_rel
+	response["outputs"]["template"] = project_dir + template_rel
+	response["metadata"] = {
+		"project_dir": project_dir,
+		"tile_file": tile_file,
+		"tile_data": tile_data
+	}
+	response["ok"] = true
 
 
 func _parse_args() -> bool:
@@ -113,6 +204,28 @@ func inspect_project():
 		"textures": helpers.scan_for_textures_in_dir(project_dir)
 	}
 	response["metadata"] = result
+	response["ok"] = true
+
+
+func list_rulesets():
+	var project_dir := _get_project_dir()
+	if project_dir.empty():
+		return
+	response["metadata"] = {
+		"project_dir": project_dir,
+		"rulesets": helpers.scan_for_rulesets_in_dir(project_dir + Const.RULESET_DIR)
+	}
+	response["ok"] = true
+
+
+func list_templates():
+	var project_dir := _get_project_dir()
+	if project_dir.empty():
+		return
+	response["metadata"] = {
+		"project_dir": project_dir,
+		"templates": helpers.scan_for_templates_in_dir(project_dir + Const.TEMPLATE_DIR)
+	}
 	response["ok"] = true
 
 
@@ -221,9 +334,15 @@ func export_subtiles():
 		return
 
 	var exported := []
+	var requested_masks := _request_int_array("masks")
+	var requested_frame := int(request.get("frame_index", -1))
 	var tile_name := tile.tile_file_name.get_basename().get_file()
 	for frame in tile.frames:
+		if requested_frame >= 0 and frame.index != requested_frame:
+			continue
 		for bitmask in frame.result_subtiles_by_bitmask:
+			if not requested_masks.empty() and not bitmask in requested_masks:
+				continue
 			var variant_index := 0
 			for subtile in frame.result_subtiles_by_bitmask[bitmask]:
 				var path := "%s/%s_frame_%d_mask_%d_variant_%d.png" % [
@@ -277,6 +396,15 @@ func _load_tile_from_request() -> TPTile:
 		return null
 
 	return tile
+
+
+func _request_int_array(key: String) -> Array:
+	var values := []
+	if not request.has(key) or typeof(request[key]) != TYPE_ARRAY:
+		return values
+	for value in request[key]:
+		values.append(int(value))
+	return values
 
 
 func _collect_tile_errors(tile: TPTile) -> Array:
@@ -401,6 +529,18 @@ func _get_project_dir() -> String:
 	return project_dir
 
 
+func _get_or_create_project_dir() -> String:
+	var project_dir := str(request.get("project_dir", ""))
+	if project_dir.empty():
+		_add_error("Missing project_dir.")
+		return ""
+	if not project_dir.ends_with("/"):
+		project_dir += "/"
+	if not _ensure_dir(project_dir):
+		return ""
+	return project_dir
+
+
 func _get_required_path(key: String) -> String:
 	var path := str(request.get(key, ""))
 	if path.empty():
@@ -422,6 +562,55 @@ func _get_output_path(key: String) -> String:
 
 func _vector_dict(value: Vector2) -> Dictionary:
 	return {"x": value.x, "y": value.y}
+
+
+func _request_vector(key: String, default_value: Vector2) -> Vector2:
+	if not request.has(key) or typeof(request[key]) != TYPE_DICTIONARY:
+		return default_value
+	var value: Dictionary = request[key]
+	return Vector2(float(value.get("x", default_value.x)), float(value.get("y", default_value.y)))
+
+
+func _ensure_dir(path: String) -> bool:
+	var dir := Directory.new()
+	if dir.dir_exists(path):
+		return true
+	if dir.make_dir_recursive(path) != OK:
+		_add_error("Could not create directory: %s" % path)
+		return false
+	return true
+
+
+func _safe_file_name(value: String) -> String:
+	return value.get_file().replace(" ", "_")
+
+
+func _copy_png(source_path: String, target_path: String) -> bool:
+	var image := Image.new()
+	if image.load(source_path) != OK:
+		_add_error("Could not load PNG: %s" % source_path)
+		return false
+	if image.save_png(target_path) != OK:
+		_add_error("Could not write PNG: %s" % target_path)
+		return false
+	return true
+
+
+func _copy_text_file(source_path: String, target_path: String) -> bool:
+	var input := File.new()
+	if input.open(source_path, File.READ) != OK:
+		_add_error("Could not open source file: %s" % source_path)
+		return false
+	var text := input.get_as_text()
+	input.close()
+
+	var output := File.new()
+	if output.open(target_path, File.WRITE) != OK:
+		_add_error("Could not write target file: %s" % target_path)
+		return false
+	output.store_string(text)
+	output.close()
+	return true
 
 
 func _add_error(message: String):
