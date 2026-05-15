@@ -37,12 +37,29 @@ Supported commands:
 - `export_texture`
 - `export_subtiles`
 - `export_mask_set`
+- `export_unity_rule_tile`
 
 `create_project_from_art` and `create_tile` accept `source_png`, `ruleset_path`, `template_path`, `project_dir`, and `tile_file`. They copy files into TilePipe2's native `textures/`, `rulesets/`, and `templates/` layout and create a `.tptile` JSON file.
 
 `export_mask_set` accepts optional `masks` and `frame_index` fields to export a filtered set of generated subtile PNGs.
 
+`export_unity_rule_tile` accepts `project_dir`, `tile_file`, `output_path`, and `manifest_path`. It writes a Unity-ready atlas PNG plus a manifest containing source dependencies, tile size, frame indexes, template positions, bitmasks, variants, and sprite rects. The Unity Editor bridge package lives in `integrations/unity/TilePipeUnityBridge` and can turn that manifest into a Unity 2D Tilemap Extras `RuleTile` with optional live reimport.
+
 Responses are JSON with `ok`, `command`, `outputs`, `warnings`, `errors`, and `metadata` fields. The companion MCP server lives at `https://github.com/Cheesewizard/tilepipe2-mcp-server`.
+
+## Unity bridge
+
+The Unity bridge is a UPM-style package at `integrations/unity/TilePipeUnityBridge`. Add it to a Unity project from Package Manager using "Add package from disk..." and select its `package.json`.
+
+Requirements:
+
+- Unity 2021.3 or newer.
+- Unity package `com.unity.2d.tilemap.extras` installed for `RuleTile` support.
+- A Godot executable path available to Unity. The bridge still uses TilePipe2's Godot headless renderer.
+
+Open `Tools > TilePipe > Unity Bridge`, set the Godot executable, TilePipe2 root, TilePipe project directory, `.tptile` file, and Unity output asset paths, then press `Generate And Import`. Enable `Live Reimport` to watch the `.tptile`, source texture, ruleset JSON, and template PNG; changes are debounced, regenerated through TilePipe headless, and reimported into the existing RuleTile asset.
+
+Future improvement: port the TilePipe generation core to C# so Unity can generate atlases and RuleTiles directly without invoking Godot.
 
 ## Intro
 Most game engines supporting 2D also support autotiling - substituting a tile variant depending on it's neighbors. That way a level designer is able to paint a terrain with one tile and have a tile variant set up automatically. To create such an autotile an artist has to copy and paste one tile multiple times to create all possible tile variations by hand and then, if there is a need to update something, he has to do it again. 

@@ -65,6 +65,10 @@ func _run():
 			var mask_state = export_subtiles()
 			if mask_state is GDScriptFunctionState:
 				yield(mask_state, "completed")
+		"export_unity_rule_tile":
+			var unity_state = export_unity_rule_tile()
+			if unity_state is GDScriptFunctionState:
+				yield(unity_state, "completed")
 		_:
 			_add_error("Unknown command: %s" % command)
 
@@ -315,6 +319,43 @@ func render_tile():
 	response["ok"] = true
 
 
+func export_unity_rule_tile():
+	var tile := validate_tile(false)
+	if tile == null or not response["errors"].empty():
+		return
+
+	yield(_render_all_frames(tile), "completed")
+	if not _ensure_all_subtiles_rendered(tile):
+		return
+
+	var output_path := _get_output_path("output_path")
+	var manifest_path := _get_output_path("manifest_path")
+	if output_path.empty() or manifest_path.empty():
+		return
+
+	var export_image := tile.glue_frames_into_image()
+	if export_image == null:
+		_add_error("Tile render produced no output image.")
+		return
+
+	if export_image.save_png(output_path) != OK:
+		_add_error("Could not save Unity atlas PNG: %s" % output_path)
+		return
+
+	var manifest := _unity_manifest_for_tile(tile, output_path)
+	var file := File.new()
+	if file.open(manifest_path, File.WRITE) != OK:
+		_add_error("Could not write Unity manifest: %s" % manifest_path)
+		return
+	file.store_string(JSON.print(manifest, "\t"))
+	file.close()
+
+	response["outputs"]["texture"] = output_path
+	response["outputs"]["manifest"] = manifest_path
+	response["metadata"] = manifest
+	response["ok"] = true
+
+
 func export_subtiles():
 	var tile := validate_tile(false)
 	if tile == null or not response["errors"].empty():
@@ -456,6 +497,72 @@ func _metadata_for_tile(tile: TPTile) -> Dictionary:
 		"missing_rule_masks": missing_rule_masks,
 		"rendered_size": _vector_dict(tile.get_full_tile_rendered_size())
 	}
+
+
+func _unity_manifest_for_tile(tile: TPTile, atlas_path: String) -> Dictionary:
+	var frame_size := tile.get_rendered_frame_size()
+	var tile_size := tile.get_output_tile_size()
+	var sprite_rects := []
+	var masks := {}
+	for frame in tile.frames:
+		var bitmasks: Array = frame.result_subtiles_by_bitmask.keys()
+		bitmasks.sort()
+		for bitmask in bitmasks:
+			if not masks.has(str(bitmask)):
+				masks[str(bitmask)] = []
+			var variant_index := 0
+			for subtile in frame.result_subtiles_by_bitmask[bitmask]:
+				var rect_position: Vector2 = subtile.position_in_template * tile_size
+				rect_position += subtile.position_in_template * tile.subtile_spacing
+				rect_position.y += frame.index * frame_size.y
+				var sprite_name := _unity_sprite_name(tile, frame.index, bitmask, variant_index)
+				var sprite_data := {
+					"name": sprite_name,
+					"mask": bitmask,
+					"frame_index": frame.index,
+					"variant_index": variant_index,
+					"template_position": _vector_dict(subtile.position_in_template),
+					"rect": {
+						"x": int(rect_position.x),
+						"y": int(rect_position.y),
+						"width": int(tile_size.x),
+						"height": int(tile_size.y)
+					}
+				}
+				sprite_rects.append(sprite_data)
+				masks[str(bitmask)].append(sprite_name)
+				variant_index += 1
+
+	return {
+		"format": "tilepipe2_unity_ruletile_manifest",
+		"version": 1,
+		"tile_name": tile.tile_file_name.get_basename().get_file(),
+		"atlas_path": atlas_path,
+		"project_dir": tile.current_directory,
+		"tile_file": tile.tile_file_name,
+		"source_files": {
+			"tile": tile.current_directory + tile.tile_file_name,
+			"texture": tile.texture_path,
+			"ruleset": tile.ruleset_path,
+			"template": tile.template_path
+		},
+		"tile_size": _vector_dict(tile_size),
+		"spacing": _vector_dict(tile.subtile_spacing),
+		"template_size": _vector_dict(tile.template_size),
+		"frame_size": _vector_dict(frame_size),
+		"frame_count": tile.frames.size(),
+		"sprites": sprite_rects,
+		"rules": masks
+	}
+
+
+func _unity_sprite_name(tile: TPTile, frame_index: int, bitmask: int, variant_index: int) -> String:
+	return "%s_mask_%d_frame_%d_variant_%d" % [
+		tile.tile_file_name.get_basename().get_file(),
+		bitmask,
+		frame_index,
+		variant_index
+	]
 
 
 func _inspect_template_image(image: Image) -> Dictionary:

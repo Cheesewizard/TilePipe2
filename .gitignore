@@ -9,3 +9,4 @@ build/win/*
 build/linux/*
 build/mac/*
 *__pycache__*
+Dependencies/*
